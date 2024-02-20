@@ -37,21 +37,20 @@ void read_binary(int Size, string FileName) {
 void analyze(string FileName) {
 
 	fstream file(FileName, ios::binary | ios::in);
+	file.open(FileName);
 
 	//записываем первый элемент как минимум и максимум 
 	int max;
-	file.open(FileName);
+	//становимся в начало файла
+	file.seekg(0, ios_base::beg);
 	file.read((char*)(&max), sizeof max);
-	file.close();
 
-	file.open(FileName);
 	int min;
+	file.seekg(0, ios_base::beg);
 	file.read((char*)(&min), sizeof min);
-	file.close();
 
-	file.open(FileName);
+	file.seekg(0, ios_base::beg);
 	for (int i = 0; i < (sizeof(file) / 10); i++) {
-
 		//создаём массив и передаём в него 10 элементов из файла
 		int* arr = new int[10];
 		for (int x = 0; x < sizeof(arr); x++) {
@@ -62,7 +61,7 @@ void analyze(string FileName) {
 		}
 		delete[] arr;
 	}
-
+	file.close();
 	cout << " max=" << max;
 	cout << " min=" << min;
 
