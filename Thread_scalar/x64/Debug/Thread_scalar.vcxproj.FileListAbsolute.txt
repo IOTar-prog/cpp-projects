@@ -1,0 +1,3 @@
+C:\Users\ilyat\Desktop\cpp\cpp_projects\Thread_integral\Thread_scalar\x64\Debug\Thread_scalar.exe
+C:\Users\ilyat\Desktop\cpp\cpp_projects\Thread_scalar\x64\Debug\Thread_scalar.exe
+G:\С++\Thread_scalar\x64\Debug\Thread_scalar.exe
