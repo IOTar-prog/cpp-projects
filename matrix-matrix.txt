@@ -1,0 +1,163 @@
+#include <iostream>
+#include <time.h>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+void multiplyMatrix(double** matrix1, double** matrix2, double** result, size_t numRows1, size_t numCols1, size_t numCols2, size_t startRow, size_t endRow) {
+    for (size_t i = startRow; i < endRow; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            result[i][j] = 0;
+            for (size_t k = 0; k < numCols1; ++k) {
+                result[i][j] += matrix1[i][k] * matrix2[k][j];
+            }
+        }
+    }
+}
+
+int main() {
+
+    size_t numRows1 = 400;
+    size_t numCols1 = 1000;
+    size_t numRows2 = 1000;
+    size_t numCols2 = 400;
+
+    // Создание двумерных массивов
+    double** matrix1 = new double* [numRows1];
+    for (size_t i = 0; i < numRows1; ++i) {
+        matrix1[i] = new double[numCols1];
+    }
+
+    double** matrix2 = new double* [numRows2];
+    for (size_t i = 0; i < numRows2; ++i) {
+        matrix2[i] = new double[numCols2];
+    }
+
+    double** result = new double* [numRows1];
+    for (size_t i = 0; i < numRows1; ++i) {
+        result[i] = new double[numCols2];
+    }
+
+    // Инициализация двумерных массивов
+    int data = 0;
+    for (size_t i = 0; i < numRows1; ++i) {
+        for (size_t j = 0; j < numCols1; ++j) {
+            matrix1[i][j] = data;
+            data++;
+        }
+    }
+
+    for (size_t i = 0; i < numRows2; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            matrix2[i][j] = data;
+            data++;
+        }
+    }
+
+    // Выводим матрицы, созданные и исходные
+    /*cout << "Матрица 1:" << endl;
+    for (size_t i = 0; i < numRows1; ++i) {
+        for (size_t j = 0; j < numCols1; ++j) {
+            cout << matrix1[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Матрица 2:" << endl;
+    for (size_t i = 0; i < numRows2; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            cout << matrix2[i][j] << " ";
+        }
+        cout << endl;
+    }*/
+
+    // Выполнение умножения матриц последовательно
+
+    clock_t std_start_time = clock();
+
+    for (size_t i = 0; i < numRows1; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            result[i][j] = 0;
+            for (size_t k = 0; k < numCols1; ++k) {
+                result[i][j] += matrix1[i][k] * matrix2[k][j];
+            }
+        }
+    }
+
+    clock_t std_end_time = clock();
+    double std_time = (double)(std_end_time - std_start_time) / CLOCKS_PER_SEC;
+
+    /*cout << "Результат последовательного перемножения матриц:" << endl;
+    for (size_t i = 0; i < numRows1; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            cout << result[i][j] << " ";
+        }
+        cout << endl;
+    }*/
+
+    cout << "std time: " << std_time << endl;
+
+    // Выполнение умножения матриц с использованием потоков
+
+    size_t a;
+    cout << "Enter thread count: ";
+    cin >> a;
+
+
+    vector<thread> threads(a);
+
+    clock_t thrd_start = clock();
+
+    size_t step = numRows1 / a;
+    size_t remainder = numRows1 % a;
+
+    size_t startRow = 0;
+    size_t endRow = step;
+
+    for (size_t i = 0; i < a; ++i) {
+        if (i == a - 1) {
+            endRow += remainder;
+        }
+        threads[i] = thread(multiplyMatrix, matrix1, matrix2, result, numRows1, numCols1, numCols2, startRow, endRow);
+        startRow = endRow;
+        endRow += step;
+    }
+
+    for (vector<thread>::iterator it = threads.begin(); it != threads.end(); ++it) {
+        thread& Thread = *it;
+        Thread.join();
+    }
+
+    clock_t thrd_end = clock();
+    double thrd_time = (double)(thrd_end - thrd_start) / CLOCKS_PER_SEC;
+
+    /*cout << "Результат параллельного перемножения матриц:" << endl;
+    for (size_t i = 0; i < numRows1; ++i) {
+        for (size_t j = 0; j < numCols2; ++j) {
+            cout << result[i][j] << " ";
+        }
+        cout << endl;
+    }*/
+
+    cout << "thrd time: " << thrd_time << endl;
+
+    // Освобождение памяти
+
+    for (size_t i = 0; i < numRows1; ++i) {
+        delete[] matrix1[i];
+    }
+    delete[] matrix1;
+
+    for (size_t i = 0; i < numRows2; ++i) {
+        delete[] matrix2[i];
+    }
+    delete[] matrix2;
+
+    for (size_t i = 0; i < numRows1; ++i) {
+        delete[] result[i];
+    }
+    delete[] result;
+
+    return 0;
+}
